@@ -1,0 +1,8 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+@tailwind react;
+
+body{
+    background-color: #636363;
+}
