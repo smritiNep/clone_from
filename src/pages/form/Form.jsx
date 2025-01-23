@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as Yup from "yup";
@@ -21,6 +21,9 @@ const schema = Yup.object().shape({
 });
 
 const Form = () => {
+  // State to store form submissions
+  const [formData, setFormData] = useState([]);
+
   const {
     register,
     handleSubmit,
@@ -31,6 +34,11 @@ const Form = () => {
   });
 
   const onSubmit = (data) => {
+    //data submitted to localStorage
+    const storedData = JSON.parse(localStorage.getItem('formData')) || [];
+    storedData.push(data);
+    localStorage.setItem('formData', JSON.stringify(storedData));
+
     console.log("Form Submitted", data);
     toast.success("Form submitted successfully!", {
       position: "top-right",
@@ -188,9 +196,13 @@ const Form = () => {
           </button>
         </div>
       </form>
+
       <ToastContainer />
     </div>
   );
 };
 
 export default Form;
+
+
+

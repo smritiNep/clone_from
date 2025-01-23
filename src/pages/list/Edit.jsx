@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as Yup from "yup";
@@ -7,34 +6,65 @@ import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 // Validation schema with Yup
-const schema = Yup.object({
+const schema = Yup.object().shape({
   title: Yup.string().required("Title is required"),
   keyUpdate: Yup.string().required("Key update is required"),
   summary: Yup.string().required("Summary is required"),
   upComming: Yup.string().required("Tomorrow's plan is required"),
-  needHelp: Yup.string().when("radioButton", {
-    is: "Yes",
-    then: Yup.string().required("Please provide details"),
+  radioButton: Yup.string().required("Please select whether you need help"),
+  needHelp: Yup.string().when('radioButton', {
+    is: 'Yes',
+    then: (schema) => schema.required('Please provide details'),
+    otherwise: (schema) => schema.notRequired(),
   }),
-}).required();
+  additional: Yup.string(),
+});
 
-const Edit = () => {
-  const { id } = useParams();
-  const index = parseInt(id, 10);
-  const navigate = useNavigate();
-  const storedData = JSON.parse(localStorage.getItem("dailyUpdates")) || [];
-  const update = storedData[index];
+const Edit = ({ formId }) => {
+  const [formData, setFormData] = useState(null);
 
-  const { register, handleSubmit, formState: { errors }, watch, setValue } = useForm({
+  // Fetch the form data from localStorage or other API using formId
+  useEffect(() => {
+    const storedData = JSON.parse(localStorage.getItem("formData")) || [];
+    const currentData = storedData.find((item) => item.id === formId);
+    if (currentData) {
+      setFormData(currentData);
+    }
+  }, [formId]);
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    watch,
+    setValue, // Set values for pre-filled form fields
+  } = useForm({
     resolver: yupResolver(schema),
   });
 
-  const radioButton = watch("radioButton");
+  useEffect(() => {
+    if (formData) {
+      // Populate form fields when formData is available
+      setValue("title", formData.title);
+      setValue("keyUpdate", formData.keyUpdate);
+      setValue("summary", formData.summary);
+      setValue("upComming", formData.upComming);
+      setValue("radioButton", formData.radioButton);
+      setValue("needHelp", formData.needHelp);
+      setValue("additional", formData.additional);
+    }
+  }, [formData, setValue]);
 
   const onSubmit = (data) => {
-    storedData[index] = data; // Update the current update
-    localStorage.setItem("dailyUpdates", JSON.stringify(storedData)); // Save back to localStorage
-    toast.success("Update saved successfully!", {
+    // Update the existing data in localStorage
+    const storedData = JSON.parse(localStorage.getItem("formData")) || [];
+    const updatedData = storedData.map((item) =>
+      item.id === formId ? { ...item, ...data } : item
+    );
+    localStorage.setItem("formData", JSON.stringify(updatedData));
+
+    console.log("Form Updated", data);
+    toast.success("Form updated successfully!", {
       position: "top-right",
       autoClose: 3000,
       hideProgressBar: true,
@@ -42,34 +72,24 @@ const Edit = () => {
       pauseOnHover: true,
       draggable: true,
       style: {
-        backgroundColor: '#71797E',
-        color: '#fff',
-        borderRadius: '8px',
-        padding: '10px 20px',
-        marginTop: '10px',
-        fontWeight: 'bold',
+        backgroundColor: "#71797E",
+        color: "#fff",
+        borderRadius: "8px",
+        padding: "10px 20px",
+        marginTop: "10px",
+        fontWeight: "bold",
       },
     });
-    navigate("/updates"); // Redirect to updates list
   };
 
-  useEffect(() => {
-    if (!update) {
-      navigate("/updates"); // Redirect if update not found
-    } else {
-      setValue("title", update.title);
-      setValue("keyUpdate", update.keyUpdate);
-      setValue("summary", update.summary);
-      setValue("upComming", update.upComming);
-      setValue("needHelp", update.needHelp);
-    }
-  }, [update, navigate, setValue]);
+  if (!formData) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <div className="max-w-3xl mx-auto mt-3 mb-1 p-6 bg-[#2d2d2d] text-white rounded-[2px] shadow-xl mb-4">
-      <h4 className="text-center text-3xl font-semibold mb-5">Edit Update</h4>
+      <h4 className="text-center text-3xl font-semibold mb-5">Edit Daily Update</h4>
       <hr className="my-8 h-0.5 border-t-0 bg-gray-400 dark:bg-white/10" />
-
       <form onSubmit={handleSubmit(onSubmit)}>
         {/* Form Title */}
         <div className="mb-4">
@@ -83,9 +103,10 @@ const Edit = () => {
             placeholder="Enter a title for this form"
             className="w-full px-4 py-2 bg-[#444] border-[#444] focus:border-[#007bff] text-white rounded-md"
           />
-          {errors.title && <p className="text-red-500">{errors.title.message}</p>}
+          {errors.title && (
+            <p className="text-red-500">{errors.title.message}</p>
+          )}
         </div>
-
         {/* Key Updates */}
         <div className="mb-4">
           <label className="flex items-center text-[#d1d1d1] mb-2">
@@ -98,9 +119,10 @@ const Edit = () => {
             className="w-full px-4 py-2 bg-[#444] border-[#444] focus:border-[#007bff] text-white rounded-md"
             rows={4}
           />
-          {errors.keyUpdate && <p className="text-red-500">{errors.keyUpdate.message}</p>}
+          {errors.keyUpdate && (
+            <p className="text-red-500">{errors.keyUpdate.message}</p>
+          )}
         </div>
-
         {/* Summary */}
         <div className="mb-4">
           <label className="flex items-center text-[#d1d1d1] mb-2">
@@ -113,9 +135,10 @@ const Edit = () => {
             className="w-full px-4 py-2 bg-[#444] border-[#444] focus:border-[#007bff] text-white rounded-md"
             rows={4}
           />
-          {errors.summary && <p className="text-red-500">{errors.summary.message}</p>}
+          {errors.summary && (
+            <p className="text-red-500">{errors.summary.message}</p>
+          )}
         </div>
-
         {/* Plans for Tomorrow */}
         <div className="mb-4">
           <label className="flex items-center text-[#d1d1d1] mb-2">
@@ -128,9 +151,10 @@ const Edit = () => {
             className="w-full px-4 py-2 bg-[#444] border-[#444] focus:border-[#007bff] text-white rounded-md"
             rows={4}
           />
-          {errors.upComming && <p className="text-red-500">{errors.upComming.message}</p>}
+          {errors.upComming && (
+            <p className="text-red-500">{errors.upComming.message}</p>
+          )}
         </div>
-
         {/* Radio Buttons */}
         <div className="mb-4">
           <label className="text-[#d1d1d1] font-semibold mb-2 block">
@@ -157,10 +181,11 @@ const Edit = () => {
               No
             </label>
           </div>
-          {errors.radioButton && <p className="text-red-500">{errors.radioButton.message}</p>}
+          {errors.radioButton && (
+            <p className="text-red-500">{errors.radioButton.message}</p>
+          )}
         </div>
-
-        {radioButton === "Yes" && (
+        {watch("radioButton") === "Yes" && (
           <div className="mb-4">
             <label className="flex items-center text-[#d1d1d1] mb-2">
               <span className="text-lg">If yes, provide details</span>
@@ -172,17 +197,30 @@ const Edit = () => {
               className="w-full px-4 py-2 bg-[#444] border-[#444] focus:border-[#007bff] text-white rounded-md"
               rows={4}
             />
-            {errors.needHelp && <p className="text-red-500">{errors.needHelp.message}</p>}
+            {errors.needHelp && (
+              <p className="text-red-500">{errors.needHelp.message}</p>
+            )}
           </div>
         )}
-
+        {/* Additional Message */}
+        <div className="mb-4">
+          <label className="flex items-center text-[#d1d1d1] mb-2">
+            <span className="text-lg">Additional message</span>
+          </label>
+          <textarea
+            {...register("additional")}
+            placeholder="Enter your message..."
+            className="w-full px-4 py-2 bg-[#444] border-[#444] focus:border-[#007bff] text-white rounded-md"
+            rows={4}
+          />
+        </div>
         {/* Submit Button */}
         <div className="flex justify-center mb-4">
           <button
             type="submit"
             className="bg-[#007bff] text-white py-2 px-6 rounded-md hover:bg-[#0056b3] font-semibold flex items-center space-x-2 mt-3"
           >
-            <span>Upadte</span>
+            <span>Update</span>
           </button>
         </div>
       </form>

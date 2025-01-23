@@ -4,7 +4,7 @@ import Header from "@components/layouts/Header";
 import Form from "@pages/form/Form";
 import Updates from "@pages/list/Updatelist";
 import View from "@pages/list/View";
-import Edit from "@pages/list/Edit"; // Import Edit page
+import Edit from "@pages/list/Edit"; 
 
 function App() {
   return (
@@ -20,7 +20,7 @@ function App() {
               <Route path="/" element={<Form />} />
               <Route path="/updates" element={<Updates />} />
               <Route path="/view/:id" element={<View />} />
-              <Route path="/edit/:id" element={<Edit />} /> {/* Add Edit Route */}
+              <Route path="/edit/:id" element={<Edit />} /> 
             </Routes>
           </div>
         </div>
