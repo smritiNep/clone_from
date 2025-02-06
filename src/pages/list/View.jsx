@@ -106,25 +106,27 @@ const View = () => {
             </div>
           )}
 
-          {/* Additional message */}
-          <div className="mb-4">
-            <label className="block text-lg mb-2 text-[#d1d1d1]">
-              Additional message:
-            </label>
-            <div
-              className="bg-[#444] p-4 rounded-md text-white quill-content"
-              dangerouslySetInnerHTML={renderHTML(formData.additional)}
-            />
-          </div>
+          {/* Additional Message */}
+          {formData.additional && (
+            <div className="mb-4">
+              <label className="block text-lg mb-2 text-[#d1d1d1]">
+                Additional Message:
+              </label>
+              <div
+                className="bg-[#444] p-4 rounded-md text-white quill-content"
+                dangerouslySetInnerHTML={renderHTML(formData.additional)}
+              />
+            </div>
+          )}
 
           {/* Display Images */}
-          <div className="mb-4">
-            <label className="block text-lg mb-2 text-[#d1d1d1]">
-              Uploaded Images:
-            </label>
-            <div className="flex space-x-2 overflow-x-auto">
-              {formData.images &&
-                formData.images.map((image, index) => (
+          {formData.images && formData.images.length > 0 && (
+            <div className="mb-4">
+              <label className="block text-lg mb-2 text-[#d1d1d1]">
+                Uploaded Images:
+              </label>
+              <div className="flex space-x-2 overflow-x-auto">
+                {formData.images.map((image, index) => (
                   <img
                     key={index}
                     src={image}
@@ -132,8 +134,9 @@ const View = () => {
                     className="w-24 h-24 object-cover rounded-md"
                   />
                 ))}
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
 
