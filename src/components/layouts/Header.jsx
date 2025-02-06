@@ -78,12 +78,12 @@ const Header = ({ onSearch }) => {
               />
             </div>
 
-            <Button color="transparent" className="p-0" onClick={handleNotificationClick}>
-              <Notifications className="text-white" />
+            <Button color="transparent" className="p-0"  onClick={handleNotificationClick}>
+              <Notifications className="text-white hover:text-blue-400 transition-colors duration-200" />
             </Button>
 
             <Button color="transparent" className="p-0" onClick={handleProfileClick}>
-              <AccountCircle className="text-white" />
+              <AccountCircle className="text-white hover:text-blue-400 transition-colors duration-200" />
             </Button>
           </div>
         </div>

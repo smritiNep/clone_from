@@ -37,14 +37,27 @@ const customStyles = {
   },
 };
 
-const Updatelist = () => {
+const Updatelist = ({ searchQuery }) => {
   const [data, setData] = useState([]);
+  const [filteredData, setFilteredData] = useState([]);
   const navigate = useNavigate();
 
   useEffect(() => {
     const storedData = JSON.parse(localStorage.getItem("formData")) || [];
     setData(storedData);
+    setFilteredData(storedData); // Initialize filteredData with the full data
   }, []);
+
+  useEffect(() => {
+    if (searchQuery) {
+      const filtered = data.filter((item) =>
+        item.title.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+      setFilteredData(filtered);
+    } else {
+      setFilteredData(data); // If no search query, show all data
+    }
+  }, [searchQuery, data]);
 
   const handleView = (id) => navigate(`/view/${id}`);
   const handleEdit = (id) => navigate(`/edit/${id}`);
@@ -52,6 +65,7 @@ const Updatelist = () => {
     if (window.confirm("Do you really want to delete this item?")) {
       const updatedData = data.filter((item) => item.id !== id);
       setData(updatedData);
+      setFilteredData(updatedData); // Update filteredData as well
       localStorage.setItem("formData", JSON.stringify(updatedData));
     }
   };
@@ -67,7 +81,6 @@ const Updatelist = () => {
       {
         name: "Title",
         selector: (row) => row.title,
-        
         style: {
           fontWeight: "500",
           textAlign: "left",
@@ -80,21 +93,21 @@ const Updatelist = () => {
           <div className="flex space-x-4">
             <button
               onClick={() => handleView(row.id)}
-               className="text-blue-500 hover:text-blue-200 transition-colors duration-200"
+              className="text-blue-500 hover:text-blue-200 transition-colors duration-200"
             >
               <Visibility style={{ color: "inherit" }} />
             </button>
             <button
               onClick={() => handleEdit(row.id)}
-               className="text-blue-500 hover:text-blue-200 transition-colors duration-200"
+              className="text-blue-500 hover:text-blue-200 transition-colors duration-200"
             >
-              <Edit style={{ color: "inherit" }}/>
+              <Edit style={{ color: "inherit" }} />
             </button>
             <button
               onClick={() => handleDelete(row.id)}
-               className="text-blue-500 hover:text-blue-200 transition-colors duration-200"
+              className="text-blue-500 hover:text-blue-200 transition-colors duration-200"
             >
-              <Delete style={{ color: "inherit" }}/>
+              <Delete style={{ color: "inherit" }} />
             </button>
           </div>
         ),
@@ -112,7 +125,7 @@ const Updatelist = () => {
       <h3 className="text-center text-3xl font-semibold mb-6">Update List</h3>
       <DataTable
         columns={columns}
-        data={data}
+        data={filteredData}
         striped
         customStyles={customStyles}
       />
