@@ -1,80 +1,56 @@
 import React, { useEffect, useState, useMemo } from "react";
-import { useNavigate } from "react-router-dom";  // Import useNavigate hook
+import { useNavigate } from "react-router-dom";
 import DataTable from "react-data-table-component";
+import { Visibility, Edit, Delete } from "@mui/icons-material";
 
 const customStyles = {
   headCells: {
     style: {
-      backgroundColor: "#2d2d2d",
-      color: "#ffffff",
+      backgroundColor: "#171616",
+      color: "#fff",
       fontWeight: "bold",
-      fontSize: "14px",
-      borderBottom: "2px solid #444",
-      padding: "10px", 
-    },
-  },
-  cells: {
-    style: {
-      fontSize: "13px",
-      color: "#f8f9fa",
-      padding: "12px",
-      backgroundColor: "#2d2d2d",
+      fontSize: "16px",
+      textAlign: "left",
+      padding: "14px",
     },
   },
   rows: {
     style: {
-      minHeight: "45px",
-      backgroundColor: "#2d2d2d",
-      borderBottom: "1px solid #444",
+      backgroundColor: "#222",
+      borderBottom: "1px solid #333",
+      minHeight: "50px",
+      "&:nth-of-type(odd)": {
+        backgroundColor: "#2a2a2a",
+      },
     },
     highlightOnHoverStyle: {
-      backgroundColor: "#555", 
-      borderBottomColor: "#6c757d",
-      outline: "1px solid #6c757d",
+      backgroundColor: "#333",
+      transition: "all 0.3s ease-in-out",
     },
   },
-  pagination: {
+  cells: {
     style: {
-      backgroundColor: "#2d2d2d",
-      color: "#ffffff",
-    },
-    pageButtonsStyle: {
-      color: "#ffffff",
-      fill: "#ffffff",
-      "&:hover": {
-        backgroundColor: "#444",
-      },
-      "&:focus": {
-        backgroundColor: "#444",
-      },
+      fontSize: "14px",
+      color: "#f1f1f1",
+      padding: "14px",
     },
   },
 };
 
 const Updatelist = () => {
   const [data, setData] = useState([]);
-  const navigate = useNavigate();  // Initialize navigate hook
+  const navigate = useNavigate();
 
-  // Load data from localStorage
   useEffect(() => {
     const storedData = JSON.parse(localStorage.getItem("formData")) || [];
     setData(storedData);
   }, []);
 
-  // View button handler
-  const handleView = (rowIndex) => {
-    navigate(`/view/${rowIndex}`);
-  };
-
-  // Edit button handler
-  const handleEdit = (rowIndex) => {
-    navigate(`/edit/${rowIndex}`);
- 
-
-    const newTitle = prompt("Edit Title:", updatedRow.title);
-    if (newTitle !== null) {
-      updatedRow.title = newTitle; 
-      updatedData[rowIndex] = updatedRow;
+  const handleView = (id) => navigate(`/view/${id}`);
+  const handleEdit = (id) => navigate(`/edit/${id}`);
+  const handleDelete = (id) => {
+    if (window.confirm("Do you really want to delete this item?")) {
+      const updatedData = data.filter((item) => item.id !== id);
       setData(updatedData);
       localStorage.setItem("formData", JSON.stringify(updatedData));
     }
@@ -85,47 +61,44 @@ const Updatelist = () => {
       {
         name: "#",
         selector: (row, index) => index + 1,
-        width: "50px",
-        style: {
-          fontWeight: "bold",
-          color: "#ffffff",
-          textAlign: "center",
-        },
+        width: "60px",
+        style: { fontWeight: "bold", textAlign: "center", color: "#fff" },
       },
       {
         name: "Title",
         selector: (row) => row.title,
-        sortable: true,
+        
         style: {
           fontWeight: "500",
-          paddingLeft: "10px", 
+          textAlign: "left",
+          paddingLeft: "12px",
         },
       },
       {
         name: "Actions",
-        cell: (row, index) => (
-          <div className="flex space-x-1"> 
+        cell: (row) => (
+          <div className="flex space-x-4">
             <button
-              onClick={() => handleView(index)} 
-              className="bg-blue-500 hover:bg-blue-600 text-white text-sm py-1 px-3 rounded"
+              onClick={() => handleView(row.id)}
+               className="text-blue-500 hover:text-blue-200 transition-colors duration-200"
             >
-              View
+              <Visibility style={{ color: "inherit" }} />
             </button>
             <button
-              onClick={() => handleEdit(index)}
-              className="bg-yellow-500 hover:bg-yellow-600 text-white text-sm py-1 px-3 rounded"
+              onClick={() => handleEdit(row.id)}
+               className="text-blue-500 hover:text-blue-200 transition-colors duration-200"
             >
-              Edit
+              <Edit style={{ color: "inherit" }}/>
             </button>
             <button
-              onClick={() => handleEdit(index)}
-              className="bg-red-500 hover:bg-yellow-600 text-white text-sm py-1 px-3 rounded"
+              onClick={() => handleDelete(row.id)}
+               className="text-blue-500 hover:text-blue-200 transition-colors duration-200"
             >
-              Delete
+              <Delete style={{ color: "inherit" }}/>
             </button>
           </div>
         ),
-        width: "20%", 
+        width: "30%",
         ignoreRowClick: true,
         allowOverflow: true,
         button: true,
@@ -135,14 +108,11 @@ const Updatelist = () => {
   );
 
   return (
-    <div className="max-w-5xl mx-auto mt-5 bg-[#2d2d2d] p-6 rounded shadow-xl text-white">
-      <h3 className="text-center text-2xl font-semibold mb-5">Form Submissions</h3>
+    <div className="max-w-5xl mx-auto mt-3 bg-[#2d2d2d] p-8 rounded-none shadow-lg text-white">
+      <h3 className="text-center text-3xl font-semibold mb-6">Update List</h3>
       <DataTable
         columns={columns}
         data={data}
-        pagination
-        highlightOnHover
-        pointerOnHover
         striped
         customStyles={customStyles}
       />
