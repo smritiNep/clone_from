@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import DOMPurify from "dompurify"; 
+import DOMPurify from "dompurify";
 import { Edit, Clear } from "@mui/icons-material";
 
 const View = () => {
@@ -29,19 +29,19 @@ const View = () => {
       <div className="bg-[#2d2d2d] p-5 rounded-none shadow-md">
         <h4 className="text-left text-3xl font-semibold mb-0 mt-0">View</h4>
         <div className="mt-[-30px] ml-[80px]">
-        <Link to={`/edit/${id}`}>
+          <Link to={`/edit/${id}`}>
             <button className="text-blue-500 hover:text-blue-200 transition-colors duration-200">
-          <Edit style={{ color: "inherit" }}/>
+              <Edit style={{ color: "inherit" }} />
             </button>
           </Link>
-          </div>
-          <div className="flex  space-x-4 mt-[-25px] ml-[675px]">
-          <Link to={`/Updates`}>
+        </div>
+        <div className="flex space-x-4 mt-[-25px] ml-[675px]">
+          <Link to={`/updates`}>
             <button className="text-blue-500 hover:text-blue-200 transition-colors duration-200">
               <Clear style={{ color: "inherit" }} />
             </button>
           </Link>
-          </div>
+        </div>
         <hr className="my-5 h-0.5 border-t-0 bg-gray-400 dark:bg-white/10" />
         <div className="space-y-4">
           {/* Title */}
@@ -58,7 +58,7 @@ const View = () => {
               Key Update:
             </label>
             <div
-              className="bg-[#444] p-4 rounded-md text-white"
+              className="bg-[#444] p-4 rounded-md text-white quill-content"
               dangerouslySetInnerHTML={renderHTML(formData.keyUpdate)}
             />
           </div>
@@ -69,7 +69,7 @@ const View = () => {
               Summary:
             </label>
             <div
-              className="bg-[#444] p-4 rounded-md text-white"
+              className="bg-[#444] p-4 rounded-md text-white quill-content"
               dangerouslySetInnerHTML={renderHTML(formData.summary)}
             />
           </div>
@@ -80,7 +80,7 @@ const View = () => {
               Tomorrow's Plan:
             </label>
             <div
-              className="bg-[#444] p-4 rounded-md text-white"
+              className="bg-[#444] p-4 rounded-md text-white quill-content"
               dangerouslySetInnerHTML={renderHTML(formData.upComming)}
             />
           </div>
@@ -100,7 +100,7 @@ const View = () => {
                 Help Details:
               </label>
               <div
-                className="bg-[#444] p-4 rounded-md text-white"
+                className="bg-[#444] p-4 rounded-md text-white quill-content"
                 dangerouslySetInnerHTML={renderHTML(formData.needHelp)}
               />
             </div>
@@ -112,7 +112,7 @@ const View = () => {
               Additional message:
             </label>
             <div
-              className="bg-[#444] p-4 rounded-md text-white"
+              className="bg-[#444] p-4 rounded-md text-white quill-content"
               dangerouslySetInnerHTML={renderHTML(formData.additional)}
             />
           </div>
@@ -136,6 +136,26 @@ const View = () => {
           </div>
         </div>
       </div>
+
+      {/* CSS for Quill content */}
+      <style jsx>{`
+        .quill-content ul,
+        .quill-content ol {
+          margin-left: 20px; /* Add indentation for lists */
+        }
+
+        .quill-content ul {
+          list-style-type: disc; /* Add bullet points for unordered lists */
+        }
+
+        .quill-content ol {
+          list-style-type: decimal; /* Add numbers for ordered lists */
+        }
+
+        .quill-content li {
+          margin-bottom: 4px; /* Add spacing between list items */
+        }
+      `}</style>
     </div>
   );
 };

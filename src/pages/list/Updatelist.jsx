@@ -4,6 +4,12 @@ import DataTable from "react-data-table-component";
 import { Visibility, Edit, Delete } from "@mui/icons-material";
 
 const customStyles = {
+  table: {
+    style: {
+      boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.3)", 
+      borderRadius: "8px",
+    },
+  },
   headCells: {
     style: {
       backgroundColor: "#171616",
@@ -65,7 +71,7 @@ const Updatelist = ({ searchQuery }) => {
     if (window.confirm("Do you really want to delete this item?")) {
       const updatedData = data.filter((item) => item.id !== id);
       setData(updatedData);
-      setFilteredData(updatedData); // Update filteredData as well
+      setFilteredData(updatedData); 
       localStorage.setItem("formData", JSON.stringify(updatedData));
     }
   };
@@ -123,12 +129,14 @@ const Updatelist = ({ searchQuery }) => {
   return (
     <div className="max-w-5xl mx-auto mt-3 bg-[#2d2d2d] p-8 rounded-none shadow-lg text-white">
       <h3 className="text-center text-3xl font-semibold mb-6">Update List</h3>
+      <div className="shadow-xl rounded-none overflow-hidden">
       <DataTable
         columns={columns}
         data={filteredData}
         striped
         customStyles={customStyles}
       />
+      </div>
     </div>
   );
 };
