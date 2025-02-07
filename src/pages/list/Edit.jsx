@@ -7,6 +7,7 @@ import "react-toastify/dist/ReactToastify.css";
 import { useParams, useNavigate } from "react-router-dom";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
+import { useDropzone } from "react-dropzone"; // Import react-dropzone
 
 // Validation schema with Yup
 const schema = Yup.object().shape({
@@ -21,7 +22,9 @@ const schema = Yup.object().shape({
     otherwise: (schema) => schema.notRequired(),
   }),
   additional: Yup.string(),
-  images: Yup.array().max(5, "You can upload up to 5 images."),
+  images: Yup.array()
+    .of(Yup.mixed().required("An image is required"))
+    .max(5, "You can upload up to 5 images."),
 });
 
 const Edit = () => {
@@ -45,6 +48,7 @@ const Edit = () => {
     formState: { errors },
     watch,
     setValue,
+    getValues,
   } = useForm({
     resolver: yupResolver(schema),
   });
@@ -62,30 +66,35 @@ const Edit = () => {
     }
   }, [formData, setValue]);
 
-  const handleImageChange = (e) => {
-    const files = Array.from(e.target.files);
-    const currentFiles = watch("images") || [];
+  // react-dropzone configuration
+  const { getRootProps, getInputProps } = useDropzone({
+    accept: "image/*", // Accept only image files
+    maxFiles: 5, // Maximum number of files
+    onDrop: (acceptedFiles) => {
+      const currentFiles = getValues("images") || [];
+      if (currentFiles.length + acceptedFiles.length > 5) {
+        toast.error("You can upload up to 5 images.");
+        return;
+      }
 
-    //  total number of images exceeds 5
-    if (currentFiles.length + files.length > 5) {
-      toast.error("You can upload up to 5 images.");
-      return;
-    }
+      const newFiles = [...currentFiles];
+      const newPreviews = [...imagePreviews];
 
-    // Convert files to base64 and store them
-    const newFiles = [...currentFiles];
-    const newPreviews = [...imagePreviews];
+      acceptedFiles.forEach((file) => {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          newFiles.push(reader.result); // Store base64 string
+          newPreviews.push(reader.result); // For preview
+          setValue("images", newFiles);
+          setImagePreviews(newPreviews);
+        };
+        reader.readAsDataURL(file); // Convert file to base64
+      });
+    },
+  });
 
-    files.forEach((file) => {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        newFiles.push(reader.result); // Store base64 string
-        newPreviews.push(reader.result); // For preview
-        setValue("images", newFiles);
-        setImagePreviews(newPreviews);
-      };
-      reader.readAsDataURL(file); // Convert file to base64
-    });
+  const handleQuillChange = (fieldName, value) => {
+    setValue(fieldName, value);
   };
 
   const onSubmit = (data) => {
@@ -121,13 +130,11 @@ const Edit = () => {
   }
 
   return (
-    <div className="max-w-3xl mx-auto mt-3 p-6 bg-[#2d2d2d] text-white rounded shadow-xl">
-      <h4 className="text-center text-3xl font-semibold mb-5">
-        Edit Daily Update
-      </h4>
-      <hr className="my-4 border-gray-500" />
+    <div className="max-w-3xl mx-auto mt-3 mb-1 p-6 bg-[#2d2d2d] text-white rounded-[2px] shadow-xl mb-4">
+      <h4 className="text-center text-3xl font-semibold mb-5">Edit Daily Update</h4>
+      <hr className="my-8 h-0.5 border-t-0 bg-gray-400 dark:bg-white/10" />
       <form onSubmit={handleSubmit(onSubmit)}>
-        {/* Title */}
+        {/* Form Title */}
         <div className="mb-4">
           <label className="flex items-center text-[#d1d1d1] mb-2">
             <span className="text-lg">Title</span>
@@ -136,7 +143,8 @@ const Edit = () => {
           <input
             type="text"
             {...register("title")}
-            className="w-full px-4 py-2 bg-[#444] text-white rounded"
+            placeholder="Enter a title for this form"
+            className="w-full px-4 py-2 bg-[#444] border-[#444] focus:border-[#007bff] text-white rounded-md"
           />
           {errors.title && (
             <p className="text-red-500">{errors.title.message}</p>
@@ -150,9 +158,10 @@ const Edit = () => {
             <span className="text-red-500 ml-2">*</span>
           </label>
           <ReactQuill
+            placeholder="Enter your response..."
             theme="snow"
             value={watch("keyUpdate") || ""}
-            onChange={(value) => setValue("keyUpdate", value)}
+            onChange={(value) => handleQuillChange("keyUpdate", value)}
             className="bg-[#444] text-white rounded-md"
             style={{ minHeight: "150px" }}
           />
@@ -168,9 +177,10 @@ const Edit = () => {
             <span className="text-red-500 ml-2">*</span>
           </label>
           <ReactQuill
+            placeholder="Enter your response..."
             theme="snow"
             value={watch("summary") || ""}
-            onChange={(value) => setValue("summary", value)}
+            onChange={(value) => handleQuillChange("summary", value)}
             className="bg-[#444] text-white rounded-md"
             style={{ minHeight: "150px" }}
           />
@@ -179,16 +189,17 @@ const Edit = () => {
           )}
         </div>
 
-        {/* Tomorrow's Plan */}
+        {/* Plans for Tomorrow */}
         <div className="mb-4">
           <label className="flex items-center text-[#d1d1d1] mb-2">
             <span className="text-lg">Tomorrow's plan</span>
             <span className="text-red-500 ml-2">*</span>
           </label>
           <ReactQuill
+            placeholder="Enter your response..."
             theme="snow"
             value={watch("upComming") || ""}
-            onChange={(value) => setValue("upComming", value)}
+            onChange={(value) => handleQuillChange("upComming", value)}
             className="bg-[#444] text-white rounded-md"
             style={{ minHeight: "150px" }}
           />
@@ -197,10 +208,11 @@ const Edit = () => {
           )}
         </div>
 
-        {/* Radio Button */}
+        {/* Radio Buttons */}
         <div className="mb-4">
-          <label className="text-[#d1d1d1]">
-            Need any Help? <span className="text-red-500">*</span>
+          <label className="text-[#d1d1d1] font-semibold mb-2 block">
+            <span>Need any Help?</span>
+            <span className="text-red-500 ml-2">*</span>
           </label>
           <div className="flex items-center space-x-6">
             <label className="text-[#d1d1d1]">
@@ -208,7 +220,7 @@ const Edit = () => {
                 type="radio"
                 {...register("radioButton")}
                 value="Yes"
-                className="mr-2"
+                className="text-[#007bff] mr-2"
               />
               Yes
             </label>
@@ -217,7 +229,7 @@ const Edit = () => {
                 type="radio"
                 {...register("radioButton")}
                 value="No"
-                className="mr-2"
+                className="text-[#007bff] mr-2"
               />
               No
             </label>
@@ -227,6 +239,7 @@ const Edit = () => {
           )}
         </div>
 
+        {/* Need Help Details */}
         {watch("radioButton") === "Yes" && (
           <div className="mb-4">
             <label className="flex items-center text-[#d1d1d1] mb-2">
@@ -234,9 +247,10 @@ const Edit = () => {
               <span className="text-red-500 ml-2">*</span>
             </label>
             <ReactQuill
+              placeholder="Enter your response..."
               theme="snow"
               value={watch("needHelp") || ""}
-              onChange={(value) => setValue("needHelp", value)}
+              onChange={(value) => handleQuillChange("needHelp", value)}
               className="bg-[#444] text-white rounded-md"
               style={{ minHeight: "150px" }}
             />
@@ -252,27 +266,29 @@ const Edit = () => {
             <span className="text-lg">Additional message</span>
           </label>
           <ReactQuill
+            placeholder="Enter your response..."
             theme="snow"
             value={watch("additional") || ""}
-            onChange={(value) => setValue("additional", value)}
+            onChange={(value) => handleQuillChange("additional", value)}
             className="bg-[#444] text-white rounded-md"
             style={{ minHeight: "150px" }}
           />
         </div>
 
-        {/* Image Upload */}
+        {/* Image Upload with react-dropzone */}
         <div className="mb-4">
           <label className="flex items-center text-[#d1d1d1] mb-2">
-            <span className="text-lg">Upload Images</span>
-            <span className="text-red-500 ml-2">*</span>
+            <span className="text-lg">Add attachments</span>
           </label>
-          <input
-            type="file"
-            accept="image/*"
-            multiple
-            onChange={handleImageChange}
-            className="w-full px-4 py-2 bg-[#444] border-[#444] focus:border-[#007bff] text-white rounded-md"
-          />
+          <div
+            {...getRootProps()}
+            className="w-full p-6 border-2 border-dashed border-gray-400 rounded-md text-center cursor-pointer hover:border-blue-500 transition-colors"
+          >
+            <input {...getInputProps()} />
+            <p className="text-gray-400">
+              Drag & drop images here, or click to select files (max 5 images)
+            </p>
+          </div>
           {errors.images && (
             <p className="text-red-500">{errors.images.message}</p>
           )}
@@ -294,15 +310,14 @@ const Edit = () => {
         <div className="flex justify-center mb-4">
           <button
             type="submit"
-            className="bg-[#007bff] text-white py-2 px-6 rounded hover:bg-[#0056b3] font-semibold"
+            className="bg-[#007bff] text-white py-2 px-6 rounded-md hover:bg-[#0056b3] font-semibold flex items-center space-x-2 mt-3"
           >
-            Update
+            <span>Update</span>
           </button>
         </div>
       </form>
 
       <ToastContainer />
-    
     </div>
   );
 };

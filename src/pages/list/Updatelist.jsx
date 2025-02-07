@@ -6,7 +6,7 @@ import { Visibility, Edit, Delete } from "@mui/icons-material";
 const customStyles = {
   table: {
     style: {
-      boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.3)", 
+      boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.3)",
       borderRadius: "8px",
     },
   },
@@ -48,12 +48,14 @@ const Updatelist = ({ searchQuery }) => {
   const [filteredData, setFilteredData] = useState([]);
   const navigate = useNavigate();
 
+  // Load data from localStorage on component mount
   useEffect(() => {
     const storedData = JSON.parse(localStorage.getItem("formData")) || [];
     setData(storedData);
     setFilteredData(storedData); // Initialize filteredData with the full data
   }, []);
 
+  // Filter data based on search query
   useEffect(() => {
     if (searchQuery) {
       const filtered = data.filter((item) =>
@@ -61,21 +63,27 @@ const Updatelist = ({ searchQuery }) => {
       );
       setFilteredData(filtered);
     } else {
-      setFilteredData(data); // If no search query, show all data
+      setFilteredData(data); 
     }
   }, [searchQuery, data]);
 
+  // Handle view action
   const handleView = (id) => navigate(`/view/${id}`);
+
+  // Handle edit action
   const handleEdit = (id) => navigate(`/edit/${id}`);
+
+  // Handle delete action
   const handleDelete = (id) => {
     if (window.confirm("Do you really want to delete this item?")) {
       const updatedData = data.filter((item) => item.id !== id);
       setData(updatedData);
-      setFilteredData(updatedData); 
+      setFilteredData(updatedData);
       localStorage.setItem("formData", JSON.stringify(updatedData));
     }
   };
 
+  // Define columns for the DataTable
   const columns = useMemo(
     () => [
       {
@@ -130,12 +138,12 @@ const Updatelist = ({ searchQuery }) => {
     <div className="max-w-5xl mx-auto mt-3 bg-[#2d2d2d] p-8 rounded-none shadow-lg text-white">
       <h3 className="text-center text-3xl font-semibold mb-6">Update List</h3>
       <div className="shadow-xl rounded-none overflow-hidden">
-      <DataTable
-        columns={columns}
-        data={filteredData}
-        striped
-        customStyles={customStyles}
-      />
+        <DataTable
+          columns={columns}
+          data={filteredData}
+          striped
+          customStyles={customStyles}
+        />
       </div>
     </div>
   );

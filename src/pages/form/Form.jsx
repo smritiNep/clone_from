@@ -7,7 +7,8 @@ import "react-toastify/dist/ReactToastify.css";
 import { v4 as uuidv4 } from "uuid";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
-import { useNavigate } from "react-router-dom"; 
+import { useNavigate } from "react-router-dom";
+import { useDropzone } from "react-dropzone";
 
 // Validation schema with Yup
 const schema = Yup.object().shape({
@@ -39,44 +40,38 @@ const Form = () => {
     resolver: yupResolver(schema),
   });
 
-  const navigate = useNavigate(); // Initialize useNavigate
+  const navigate = useNavigate();
+  const [imagePreviews, setImagePreviews] = useState([]);
+
+  // react-dropzone configuration
+  const { getRootProps, getInputProps } = useDropzone({
+    accept: "image/*", // Accept only image files
+    maxFiles: 5, // Maximum number of files
+    onDrop: (acceptedFiles) => {
+      const currentFiles = getValues("images") || [];
+      if (currentFiles.length + acceptedFiles.length > 5) {
+        toast.error("You can upload up to 5 images.");
+        return;
+      }
+
+      const newFiles = [...currentFiles];
+      const newPreviews = [...imagePreviews];
+
+      acceptedFiles.forEach((file) => {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          newFiles.push(reader.result); // Store base64 string
+          newPreviews.push(reader.result); // For preview
+          setValue("images", newFiles);
+          setImagePreviews(newPreviews);
+        };
+        reader.readAsDataURL(file); // Convert file to base64
+      });
+    },
+  });
 
   const handleQuillChange = (fieldName, value) => {
     setValue(fieldName, value);
-  };
-
-  const [imagePreviews, setImagePreviews] = useState([]);
-
-  const handleImageChange = (e) => {
-    const files = Array.from(e.target.files);
-    const currentFiles = getValues("images") || [];
-
-    // total number of images exceeds 5
-    if (currentFiles.length + files.length > 5) {
-      toast.error("You can upload up to 5 images.");
-      return;
-    }
-
-    // Convert files to base64 and store them
-    const newFiles = [...currentFiles];
-    const newPreviews = [...imagePreviews];
-
-    files.forEach((file) => {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        newFiles.push(reader.result); // Store base64 string
-        newPreviews.push(reader.result); // For preview
-        setValue("images", newFiles);
-        setImagePreviews(newPreviews);
-
-        // Save to localStorage
-        const storedData = JSON.parse(localStorage.getItem("formData")) || [];
-        const formDataWithId = { ...getValues(), images: newFiles, id: uuidv4() };
-        storedData.push(formDataWithId);
-        localStorage.setItem("formData", JSON.stringify(storedData));
-      };
-      reader.readAsDataURL(file); // Convert file to base64
-    });
   };
 
   const onSubmit = (data) => {
@@ -219,6 +214,8 @@ const Form = () => {
             <p className="text-red-500">{errors.radioButton.message}</p>
           )}
         </div>
+
+        {/* Need Help Details */}
         {watch("radioButton") === "Yes" && (
           <div className="mb-4">
             <label className="flex items-center text-[#d1d1d1] mb-2">
@@ -254,19 +251,20 @@ const Form = () => {
           />
         </div>
 
-        {/* Image Upload */}
+        {/* Image Upload with react-dropzone */}
         <div className="mb-4">
           <label className="flex items-center text-[#d1d1d1] mb-2">
-            <span className="text-lg">Upload Images</span>
-            <span className="text-red-500 ml-2">*</span>
+            <span className="text-lg">Add attachments</span>
           </label>
-          <input
-            type="file"
-            accept="image/*"
-            multiple
-            onChange={handleImageChange}
-            className="w-full px-4 py-2 bg-[#444] border-[#444] focus:border-[#007bff] text-white rounded-md"
-          />
+          <div
+            {...getRootProps()}
+            className="p-6 border-2 border-dashed border-gray-400 rounded-md text-center cursor-pointer hover:border-blue-500 transition-colors"
+          >
+            <input {...getInputProps()} />
+            <p className="text-gray-400">
+              Drag & drop images here, or click to select files (max 5 images)
+            </p>
+          </div>
           {errors.images && (
             <p className="text-red-500">{errors.images.message}</p>
           )}
@@ -296,8 +294,6 @@ const Form = () => {
       </form>
 
       <ToastContainer />
-      {/* Internal CSS */}
-      
     </div>
   );
 };

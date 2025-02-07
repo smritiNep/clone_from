@@ -71,7 +71,7 @@ body{
       255,
       255,
       0.4
-    ); /* Example active background */
+    ); /* active background */
   }
 
   .ql-toolbar button.ql-active .ql-stroke,
@@ -82,7 +82,7 @@ body{
       95,
       239,
       0.96
-    ) !important; /* Example active icon color (blue) */
+    ) !important; /* active icon color (blue) */
   }
 
   .ql-toolbar button.ql-active .ql-fill,
@@ -93,7 +93,7 @@ body{
       95,
       239,
       0.96
-    ) !important; /* Example active icon color (blue) */
+    ) !important; /* active icon color (blue) */
   }
 
   .ql-toolbar button.ql-active .ql-picker-label,
@@ -104,7 +104,7 @@ body{
       95,
       239,
       0.96
-    ) !important; /* Example active text color (blue) */
+    ) !important; /* active text color (blue) */
   }
 
   .ql-container {
