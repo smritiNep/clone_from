@@ -6,6 +6,21 @@
 body{
     background-color: #636363;
 }
+
+/* Tablets */
+@media (max-width: 768px) {
+  body {
+      font-size: 14px;
+  }
+}
+
+/* Mobile phones */
+@media (max-width: 480px) {
+  body {
+      font-size: 12px;
+  }
+}
+
 .ql-editor {
     color: white !important;
   }
@@ -47,7 +62,7 @@ body{
       255,
       255,
       0.2
-    ); /* Example hover background */
+    ); /*  hover background */
   }
 
   .ql-toolbar button:hover .ql-stroke {

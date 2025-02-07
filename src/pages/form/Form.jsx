@@ -70,8 +70,14 @@ const Form = () => {
     },
   });
 
+  // Custom handler for ReactQuill 
   const handleQuillChange = (fieldName, value) => {
-    setValue(fieldName, value);
+    // Numeric list items
+    const correctedValue = value.replace(
+      /<li>(\d+)\./g,
+      (match, p1) => `<li value="${p1}">${p1}.`
+    );
+    setValue(fieldName, correctedValue);
   };
 
   const onSubmit = (data) => {
@@ -82,7 +88,8 @@ const Form = () => {
     const storedData = JSON.parse(localStorage.getItem("formData")) || [];
     storedData.push(formDataWithId);
     localStorage.setItem("formData", JSON.stringify(storedData));
-
+  
+  //  toster design
     console.log("Form Submitted", formDataWithId);
     toast.success("Form submitted successfully!", {
       position: "top-right",
@@ -119,7 +126,7 @@ const Form = () => {
           <input
             type="text"
             {...register("title")}
-            placeholder="Enter a title for this form"
+            placeholder="Enter a title..."
             className="w-full px-4 py-2 bg-[#444] border-[#444] focus:border-[#007bff] text-white rounded-md"
           />
           {errors.title && (

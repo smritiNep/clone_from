@@ -7,7 +7,7 @@ import "react-toastify/dist/ReactToastify.css";
 import { useParams, useNavigate } from "react-router-dom";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
-import { useDropzone } from "react-dropzone"; // Import react-dropzone
+import { useDropzone } from "react-dropzone";
 
 // Validation schema with Yup
 const schema = Yup.object().shape({
@@ -60,7 +60,7 @@ const Edit = () => {
       setValue("summary", formData.summary);
       setValue("upComming", formData.upComming);
       setValue("radioButton", formData.radioButton);
-      setValue("needHelp", formData.needHelp);
+      setValue("needHelp", formData.needHelp || ""); // Ensure needHelp is registered
       setValue("additional", formData.additional);
       setValue("images", formData.images || []);
     }
@@ -85,7 +85,7 @@ const Edit = () => {
         reader.onloadend = () => {
           newFiles.push(reader.result); // Store base64 string
           newPreviews.push(reader.result); // For preview
-          setValue("images", newFiles);
+          setValue("images", newFiles, { shouldValidate: true });
           setImagePreviews(newPreviews);
         };
         reader.readAsDataURL(file); // Convert file to base64
@@ -94,7 +94,7 @@ const Edit = () => {
   });
 
   const handleQuillChange = (fieldName, value) => {
-    setValue(fieldName, value);
+    setValue(fieldName, value, { shouldValidate: true }); // Force validation
   };
 
   const onSubmit = (data) => {
